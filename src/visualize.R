@@ -1,5 +1,5 @@
 install.packages("pacman")
-pacman::p_load(ggparliament, dplyr, ggplot2, tibble)
+pacman::p_load(ggparliament, tidyverse, ggplot2)
 
 # set wd
 setwd("C:/Projects/Personal/kosovo-elections-2019/src/")
@@ -66,20 +66,6 @@ for(i in unique(df$Komuna)){
     rbind(list("Tjera",0,100-sum(df$Përqindja.e.votave.të.vlefshme[which(df$Komuna==i)]),i))
 }
 
-# Add short names
-for(i in unique(df$Subjekti.Politik)){
-  df$color <- 
-}
-
-# add colors
-2019;Kosovo;Parlament;;LVV;20;0;#e31a1c
-2019;Kosovo;Parlament;;LDK;24;0;#a6cee3
-2019;Kosovo;Parlament;;PDK;22;0;#1f78b4
-2019;Kosovo;Parlament;;AAK-PSD;26;1;#fb9a99
-2019;Kosovo;Parlament;;NISMA-AKR-PD;8;0;#33a02c
-2019;Kosovo;Parlament;;ALTERNATIVA;0;0;
-2019;Kosovo;Parlament;;MINORITETET;20;0;#fdbf6f
-
 df <- arrange(df, Përqindja.e.votave.të.vlefshme)
 
 ggplot(df, aes(Komuna, Përqindja.e.votave.të.vlefshme, fill = Subjekti.Politik, 
@@ -92,3 +78,42 @@ ggplot(df, aes(Komuna, Përqindja.e.votave.të.vlefshme, fill = Subjekti.Politik,
   labs(y="Përqindja e votave të vlefshme", 
        title = "Përqindjet e subjekteve politike në 7 komunat kryesore",
        fill="Subjekti Politik")
+
+### Parties that got more than 
+
+df <- read.csv("../data/raw/overall_results.csv",stringsAsFactors=FALSE, encoding="UTF-8")
+
+
+df <- df %>% filter(year == 2019) %>% arrange(df$votes)
+df$party_short <- factor(df$party_short, levels = df$party_short)
+df$party_long <- factor(df$party_long, levels = df$party_long)
+
+ggplot(data=df, aes(x=party_short, y=votes, fill=party_short)) +
+  geom_bar(stat="identity") +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values=df$color)
+
+
+ggplot(data=df.2019, aes(x=party_short, y=votes)) +
+  geom_bar(stat="identity") +
+  coord_flip()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
