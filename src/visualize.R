@@ -1,8 +1,8 @@
 install.packages("pacman")
-pacman::p_load(ggparliament, dplyr, ggplot2)
+pacman::p_load(ggparliament, dplyr, ggplot2, tibble)
 
 # set wd
-setwd("C:/Projects/Personal/kosovo-elections/src/")
+setwd("C:/Projects/Personal/kosovo-elections-2019/src/")
 
 ## Parliament graph
 
@@ -36,3 +36,59 @@ ggsave("../figures/kosovo-parliament-2019-shqip-v2.png", width=12, height = 7)
 
 
 ### Horizontal bar plot
+
+df <- read.csv("../data/interim/municipalities_2019.csv",stringsAsFactors=FALSE, encoding="UTF-8")
+
+ggplot(data = df, aes(x = Komuna, y = Përqindja.e.votave.të.vlefshme, fill = Subjekti.Politik)) + 
+  geom_bar(stat = "identity") +
+  coord_flip()
+
+ggplot(df, aes(x = Komuna, y = Përqindja.e.votave.të.vlefshme))+
+  geom_col(aes(fill = Subjekti.Politik), width = 0.7) +
+  coord_flip() +
+  theme(legend.position = "none")
+
+### Top 7 Municipalities
+
+df <- df %>% filter(
+  Komuna == "Prishtinë" | 
+  Komuna == "Prizren" | 
+  Komuna == "Pejë" | 
+  Komuna == "Gjilan" | 
+  Komuna == "Mitrovicë e Jugut" | 
+  Komuna == "Ferizaj" |
+  Komuna == "Gjakovë") %>%
+  filter(Përqindja.e.votave.të.vlefshme >= 5.0)
+
+# add the remaining percent
+for(i in unique(df$Komuna)){
+  df <- df %>% 
+    rbind(list("Tjera",0,100-sum(df$Përqindja.e.votave.të.vlefshme[which(df$Komuna==i)]),i))
+}
+
+# Add short names
+for(i in unique(df$Subjekti.Politik)){
+  df$color <- 
+}
+
+# add colors
+2019;Kosovo;Parlament;;LVV;20;0;#e31a1c
+2019;Kosovo;Parlament;;LDK;24;0;#a6cee3
+2019;Kosovo;Parlament;;PDK;22;0;#1f78b4
+2019;Kosovo;Parlament;;AAK-PSD;26;1;#fb9a99
+2019;Kosovo;Parlament;;NISMA-AKR-PD;8;0;#33a02c
+2019;Kosovo;Parlament;;ALTERNATIVA;0;0;
+2019;Kosovo;Parlament;;MINORITETET;20;0;#fdbf6f
+
+df <- arrange(df, Përqindja.e.votave.të.vlefshme)
+
+ggplot(df, aes(Komuna, Përqindja.e.votave.të.vlefshme, fill = Subjekti.Politik, 
+               order = -as.numeric(Përqindja.e.votave.të.vlefshme)))+
+  geom_bar(stat="identity") +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_y_continuous(labels=function(x) paste0(x,"%")) +
+  labs(y="Përqindja e votave të vlefshme", 
+       title = "Përqindjet e subjekteve politike në 7 komunat kryesore",
+       fill="Subjekti Politik")
