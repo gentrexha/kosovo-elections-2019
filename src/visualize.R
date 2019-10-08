@@ -81,24 +81,55 @@ ggplot(df, aes(Komuna, Përqindja.e.votave.të.vlefshme, fill = Subjekti.Politik,
 
 ### Parties that got more than 
 
-df <- read.csv("../data/raw/overall_results.csv",stringsAsFactors=FALSE, encoding="UTF-8")
+df <- read.csv("../data/raw/overall_results_v2.csv",stringsAsFactors=FALSE, encoding="UTF-8")
 
+df_2019 <- df %>% filter(year == 2019)
+df_2017 <- df %>% filter(year == 2017)
 
-df <- df %>% filter(year == 2019) %>% arrange(df$votes)
-df$party_short <- factor(df$party_short, levels = df$party_short)
-df$party_long <- factor(df$party_long, levels = df$party_long)
+df_2019$diff <- round(df_2019$percentage - df_2017$percentage,1)
+df_2019 <- df_2019 %>% arrange(percentage)
+df_2019$party_short <- factor(df_2019$party_short, levels = df_2019$party_short)
+df_2019$party_long <- factor(df_2019$party_long, levels = df_2019$party_long)
 
-ggplot(data=df, aes(x=party_short, y=votes, fill=party_short)) +
-  geom_bar(stat="identity") +
+for (i in 1:length(df_2019$diff)) {
+  if (df_2019$diff[i] > 0) {
+    df_2019$diff[i] <- paste("+",df_2019$diff[i],sep="")
+  }
+}
+
+ggplot(data=df_2019, aes(x=party_short, y=percentage, fill=party_short)) +
+  geom_bar(stat="identity", width = 0.55) +
   coord_flip() +
   theme_minimal() +
   theme(legend.position = "top") +
-  scale_fill_manual(values=df$color)
+  scale_fill_manual(values=df_2019$color) +
+  labs(fill = "Subjekti Politik", x = "", y = "Përqindja e votave", title="Përqindja e votave sipas subjektit politik",
+       subtitle="Pa vota me kusht dhe me postë") +
+  geom_text(aes(label=paste(percentage, 
+                            "%", " (",df_2019$diff, ")", sep=""), size=3.5)) +
+  ylim(0,35)
+
+ggsave("../figures/example1-v2.png", width=12,height = 8)
 
 
-ggplot(data=df.2019, aes(x=party_short, y=votes)) +
-  geom_bar(stat="identity") +
-  coord_flip()
+df_2017 <- df_2017 %>% arrange(percentage)
+df_2017$party_short <- factor(df_2017$party_short, levels = df_2019$party_short)
+df_2017$party_long <- factor(df_2017$party_long, levels = df_2019$party_long)
+
+ggplot(data=df_2017, aes(x=party_short, y=percentage, fill=party_short)) +
+  geom_bar(stat="identity", width = 0.55, alpha=1) +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_manual(values=df_2019$color) +
+  theme(legend.position="top",
+          panel.background = element_rect(fill = "transparent"),
+          panel.border=element_blank(),panel.grid.major=element_blank(),
+          panel.grid.minor=element_blank(),plot.background=element_blank()) +
+  ylim(0,35) +
+  labs(fill = "Subjekti Politik", x = "", y = "Vota", title="Numri i votave sipas subjektit politik",
+       subtitle="Pa vota me kusht dhe me poste")
+
+ggsave("../figures/example2-v2.png", width=12,height = 8, bg = "transparent")
 
 
 
