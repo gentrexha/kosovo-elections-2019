@@ -25,14 +25,20 @@ deputies_2017 <- ggplot(ks_parliament_2019, aes(x, y, colour = party_short)) +
   #set theme_ggparliament
   theme_ggparliament() +
   #other aesthetics
-  labs(colour = "Partia ose Koalicionet", 
+  labs(colour = "Subjekti Politik", 
        title = "Parlamenti i Republikes së Kosovës në vitin 2019",
-       subtitle = "Partia që kontrollon parlamentin është e theksuar") +
-  scale_colour_manual(values = ks_parliament_2019$colour, limits = ks_parliament_2019$party_short)
+       subtitle = "Partia që kontrollon parlamentin është e theksuar", 
+       caption = "Burimi: https://rezultatet2019.org/") +
+  scale_colour_manual(values = ks_parliament_2019$colour, limits = ks_parliament_2019$party_short) +
+  theme(
+    plot.title = element_text(hjust = 0, size = 18),    # Center title position and size
+    plot.subtitle = element_text(hjust = 0),            # Center subtitle
+    plot.caption = element_text(hjust = 0.025, face = "italic")# move caption to the left
+  )
 
 deputies_2017
 
-ggsave("../figures/kosovo-parliament-2019-shqip-v2.png", width=12, height = 7)
+ggsave("../figures/kosovo-parliament-2019-shqip-v4.png", width=12, height = 8)
 
 
 ### Horizontal bar plot
@@ -131,6 +137,67 @@ ggplot(data=df_2017, aes(x=party_short, y=percentage, fill=party_short)) +
 
 ggsave("../figures/example2-v2.png", width=12,height = 8, bg = "transparent")
 
+###
+### Party seats
+###
+
+df <- read.csv("../data/raw/overall_seats.csv",stringsAsFactors=FALSE, encoding="UTF-8")
+
+df_2019 <- df %>% filter(year == 2019)
+df_2017 <- df %>% filter(year == 2017)
+
+df_2019$diff <- round(df_2019$seats - df_2017$seats,1)
+df_2019 <- df_2019 %>% arrange(seats)
+df_2019$party_short <- factor(df_2019$party_short, levels = df_2019$party_short)
+df_2019$party_long <- factor(df_2019$party_long, levels = df_2019$party_long)
+
+for (i in 1:length(df_2019$diff)) {
+  if (df_2019$diff[i] > 0) {
+    df_2019$diff[i] <- paste("+",df_2019$diff[i],sep="")
+  }
+}
+
+ggplot(data=df_2019, aes(x=party_short, y=seats, fill=party_short)) +
+  geom_bar(stat="identity", width = 0.55) +
+  coord_flip() +
+  theme_minimal() +
+  theme(legend.position = "top") +
+  scale_fill_manual(values=df_2019$color) +
+  labs(fill = "Subjekti Politik", x = "", y = "Ulëse", title="Numri i ulëseve sipas subjektit politik",
+       subtitle="Pa vota me kusht dhe me postë") +
+  geom_text(aes(label=paste(seats, 
+                            " ulëse", " (",df_2019$diff, ")", sep=""), size=3.5, hjust=-.10)) +
+  ylim(0,35) +
+  theme(
+    plot.title = element_text(hjust = 0, size = 24),    # Center title position and size
+    plot.subtitle = element_text(hjust = 0),            # Center subtitle
+  )
+
+ggsave("../figures/uleset-2019.png", width=12,height = 8)
+
+
+df_2017 <- df_2017 %>% arrange(seats)
+df_2017$party_short <- factor(df_2017$party_short, levels = df_2019$party_short)
+df_2017$party_long <- factor(df_2017$party_long, levels = df_2019$party_long)
+
+ggplot(data=df_2017, aes(x=party_short, y=seats, fill=party_short)) +
+  geom_bar(stat="identity", width = 0.35, alpha=1) +
+  coord_flip() +
+  theme_minimal() +
+  scale_fill_manual(values=df_2019$color) +
+  theme(legend.position="top",
+        panel.background = element_rect(fill = "transparent"),
+        panel.border=element_blank(),panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),plot.background=element_blank()) +
+  ylim(0,35) +
+  labs(fill = "Subjekti Politik", x = "", y = "Vota", title="Numri i ulëseve sipas subjektit politik",
+       subtitle="Pa vota me kusht dhe me poste") +
+  theme(
+    plot.title = element_text(hjust = 0, size = 24),    # Center title position and size
+    plot.subtitle = element_text(hjust = 0),            # Center subtitle
+  )
+
+ggsave("../figures/uleset-2017.png", width=12,height = 8, bg = "transparent")
 
 
 
