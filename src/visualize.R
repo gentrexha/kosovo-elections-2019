@@ -164,7 +164,7 @@ ggplot(data=df_2019, aes(x=party_short, y=seats, fill=party_short)) +
   theme(legend.position = "top") +
   scale_fill_manual(values=df_2019$color) +
   labs(fill = "Subjekti Politik", x = "", y = "Ulëse", title="Numri i ulëseve sipas subjektit politik",
-       subtitle="Pa vota me kusht dhe me postë") +
+       subtitle="Pa vota me kusht dhe me postë", caption = "Krahasimi me lis") +
   geom_text(aes(label=paste(seats, 
                             " ulëse", " (",df_2019$diff, ")", sep=""), size=3.5, hjust=-.10)) +
   ylim(0,35) +
